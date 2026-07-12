@@ -20,22 +20,24 @@ jobs:
           echo "Start: $(date)"
           echo "======================================"
 
-          #####################################
-          # 修改这里，把你的域名填进去即可
-          #####################################
+          ###################################################
+          # 在这里填写你的节点，一个一行
+          ###################################################
           URLS=(
             "https://cruel-elise-ajgboqr-1fc1a11a.koyeb.app"
+            #"https://node2.example.com"
+            #"https://node3.example.com"
           )
 
-          #####################################
-          # User-Agent
-          #####################################
+          ###################################################
+          # 随机 User-Agent
+          ###################################################
           AGENTS=(
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
           "Mozilla/5.0 (X11; Linux x86_64)"
-          "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)"
           "Mozilla/5.0 (Linux; Android 15)"
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)"
           )
 
           TOTAL=${#URLS[@]}
@@ -49,8 +51,7 @@ jobs:
 
             echo ""
             echo "--------------------------------------"
-            echo "Visiting:"
-            echo "$URL"
+            echo "Visiting: $URL"
 
             HTTP_CODE=$(curl \
               -L \
@@ -64,17 +65,20 @@ jobs:
               -w "%{http_code}" \
               "$URL")
 
-            if [[ "$HTTP_CODE" =~ ^2|3|4$ ]]; then
-                echo "✅ HTTP $HTTP_CODE"
-                ((OK++))
+            echo "HTTP Status: $HTTP_CODE"
+
+            # 2xx、3xx、4xx 都认为访问成功
+            if [[ "$HTTP_CODE" =~ ^[234] ]]; then
+              echo "✅ Success"
+              OK=$((OK+1))
             else
-                echo "❌ HTTP $HTTP_CODE"
-                ((FAIL++))
+              echo "❌ Failed"
+              FAIL=$((FAIL+1))
             fi
 
             SLEEP=$((RANDOM % 8 + 3))
             echo "Sleep ${SLEEP}s..."
-            sleep $SLEEP
+            sleep "$SLEEP"
 
           done
 
@@ -85,3 +89,6 @@ jobs:
           echo "Failed  : $FAIL"
           echo "Total   : $TOTAL"
           echo "======================================"
+
+          # 无论结果如何，都不要让 GitHub Actions 报错
+          exit 0
