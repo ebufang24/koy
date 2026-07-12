@@ -2,8 +2,8 @@ name: Koyeb Keep Alive
 
 on:
   schedule:
-    # 每30分钟执行一次
-    - cron: "*/30 * * * *"
+    # 每小时 11 分、41 分执行一次，避开 GitHub 高峰
+    - cron: "11,41 * * * *"
 
   workflow_dispatch:
 
@@ -16,22 +16,16 @@ jobs:
         shell: bash
         run: |
 
-          echo "======================================"
-          echo "Start: $(date)"
-          echo "======================================"
+          echo "========================================"
+          echo "Start : $(date -u)"
+          echo "Event : $GITHUB_EVENT_NAME"
+          echo "========================================"
 
-          ###################################################
-          # 修改这里，填写你的域名
-          ###################################################
           URLS=(
             "https://koy.621011.xyz"
             "https://koy15.621011.xyz"
-            #"https://node3.xxx.com"
           )
 
-          ###################################################
-          # 随机浏览器
-          ###################################################
           AGENTS=(
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
@@ -41,40 +35,45 @@ jobs:
           )
 
           TOTAL=${#URLS[@]}
+          COUNT=0
 
           for URL in "${URLS[@]}"
           do
+              COUNT=$((COUNT+1))
 
-            UA=${AGENTS[$RANDOM % ${#AGENTS[@]}]}
+              UA=${AGENTS[$RANDOM % ${#AGENTS[@]}]}
 
-            echo ""
-            echo "--------------------------------------"
-            echo "Visiting: $URL"
+              echo ""
+              echo "----------------------------------------"
+              echo "[$COUNT/$TOTAL] $URL"
 
-            # 只访问，不判断结果
-            curl \
-              -L \
-              --connect-timeout 15 \
-              --max-time 40 \
-              --retry 2 \
-              --retry-delay 3 \
-              -A "$UA" \
-              -s \
-              -o /dev/null \
-              "$URL" || true
+              START=$(date +%s)
 
-            echo "✓ Request finished"
+              curl \
+                -L \
+                --connect-timeout 10 \
+                --max-time 25 \
+                --retry 1 \
+                --retry-delay 2 \
+                --user-agent "$UA" \
+                --silent \
+                --output /dev/null \
+                "$URL" >/dev/null 2>&1 || true
 
-            SLEEP=$((RANDOM % 8 + 3))
-            echo "Sleep ${SLEEP}s..."
-            sleep "$SLEEP"
+              END=$(date +%s)
+
+              echo "Finished in $((END-START)) sec"
+
+              SLEEP=$((RANDOM % 6 + 3))
+              echo "Sleep ${SLEEP}s"
+              sleep "$SLEEP"
 
           done
 
           echo ""
-          echo "======================================"
-          echo "Finished: $(date)"
-          echo "Visited ${TOTAL} URL(s)"
-          echo "======================================"
+          echo "========================================"
+          echo "Visited $TOTAL URL(s)"
+          echo "Finish : $(date -u)"
+          echo "========================================"
 
           exit 0
