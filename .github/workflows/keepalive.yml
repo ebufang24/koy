@@ -21,16 +21,16 @@ jobs:
           echo "======================================"
 
           ###################################################
-          # 在这里填写你的节点，一个一行
+          # 修改这里，填写你的域名
           ###################################################
           URLS=(
             "https://koy.621011.xyz"
-            #"https://node2.example.com"
-            #"https://node3.example.com"
+            #"https://node2.xxx.com"
+            #"https://node3.xxx.com"
           )
 
           ###################################################
-          # 随机 User-Agent
+          # 随机浏览器
           ###################################################
           AGENTS=(
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
@@ -41,8 +41,6 @@ jobs:
           )
 
           TOTAL=${#URLS[@]}
-          OK=0
-          FAIL=0
 
           for URL in "${URLS[@]}"
           do
@@ -53,28 +51,19 @@ jobs:
             echo "--------------------------------------"
             echo "Visiting: $URL"
 
-            HTTP_CODE=$(curl \
+            # 只访问，不判断结果
+            curl \
               -L \
               --connect-timeout 15 \
               --max-time 40 \
               --retry 2 \
               --retry-delay 3 \
               -A "$UA" \
-              -o /dev/null \
               -s \
-              -w "%{http_code}" \
-              "$URL")
+              -o /dev/null \
+              "$URL" || true
 
-            echo "HTTP Status: $HTTP_CODE"
-
-            # 2xx、3xx、4xx 都认为访问成功
-            if [[ "$HTTP_CODE" =~ ^[234] ]]; then
-              echo "✅ Success"
-              OK=$((OK+1))
-            else
-              echo "❌ Failed"
-              FAIL=$((FAIL+1))
-            fi
+            echo "✓ Request finished"
 
             SLEEP=$((RANDOM % 8 + 3))
             echo "Sleep ${SLEEP}s..."
@@ -85,10 +74,7 @@ jobs:
           echo ""
           echo "======================================"
           echo "Finished: $(date)"
-          echo "Success : $OK"
-          echo "Failed  : $FAIL"
-          echo "Total   : $TOTAL"
+          echo "Visited ${TOTAL} URL(s)"
           echo "======================================"
 
-          # 无论结果如何，都不要让 GitHub Actions 报错
           exit 0
