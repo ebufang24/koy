@@ -1,0 +1,87 @@
+name: Koyeb Keep Alive
+
+on:
+  schedule:
+    # 每30分钟执行一次
+    - cron: "*/30 * * * *"
+
+  workflow_dispatch:
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Wake up Koyeb Services
+        shell: bash
+        run: |
+
+          echo "======================================"
+          echo "Start: $(date)"
+          echo "======================================"
+
+          #####################################
+          # 修改这里，把你的域名填进去即可
+          #####################################
+          URLS=(
+            "https://cruel-elise-ajgboqr-1fc1a11a.koyeb.app"
+          )
+
+          #####################################
+          # User-Agent
+          #####################################
+          AGENTS=(
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
+          "Mozilla/5.0 (X11; Linux x86_64)"
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)"
+          "Mozilla/5.0 (Linux; Android 15)"
+          )
+
+          TOTAL=${#URLS[@]}
+          OK=0
+          FAIL=0
+
+          for URL in "${URLS[@]}"
+          do
+
+            UA=${AGENTS[$RANDOM % ${#AGENTS[@]}]}
+
+            echo ""
+            echo "--------------------------------------"
+            echo "Visiting:"
+            echo "$URL"
+
+            HTTP_CODE=$(curl \
+              -L \
+              --connect-timeout 15 \
+              --max-time 40 \
+              --retry 2 \
+              --retry-delay 3 \
+              -A "$UA" \
+              -o /dev/null \
+              -s \
+              -w "%{http_code}" \
+              "$URL")
+
+            if [[ "$HTTP_CODE" =~ ^2|3|4$ ]]; then
+                echo "✅ HTTP $HTTP_CODE"
+                ((OK++))
+            else
+                echo "❌ HTTP $HTTP_CODE"
+                ((FAIL++))
+            fi
+
+            SLEEP=$((RANDOM % 8 + 3))
+            echo "Sleep ${SLEEP}s..."
+            sleep $SLEEP
+
+          done
+
+          echo ""
+          echo "======================================"
+          echo "Finished: $(date)"
+          echo "Success : $OK"
+          echo "Failed  : $FAIL"
+          echo "Total   : $TOTAL"
+          echo "======================================"
