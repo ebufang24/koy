@@ -25,7 +25,7 @@ jobs:
           ###################################################
           URLS=(
             "https://koy.621011.xyz"
-            #"https://node2.xxx.com"
+            "https://koy15.621011.xyz"
             #"https://node3.xxx.com"
           )
 
