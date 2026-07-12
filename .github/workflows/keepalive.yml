@@ -2,8 +2,8 @@ name: Koyeb Keep Alive
 
 on:
   schedule:
-    # 每小时 11 分、41 分执行一次，避开 GitHub 高峰
-    - cron: "11,41 * * * *"
+    # 每小时15分执行一次，避开 GitHub 高峰
+    - cron: "*/15 * * * *"
 
   workflow_dispatch:
 
@@ -22,8 +22,8 @@ jobs:
           echo "========================================"
 
           URLS=(
-            "https://koy.621011.xyz"
-            "https://koy15.621011.xyz"
+            "https://supposed-timi-ajgboqr-f5dc4042.koyeb.app"
+            "https://angry-gretna-fangqin097-9c826f86.koyeb.app"
           )
 
           AGENTS=(
