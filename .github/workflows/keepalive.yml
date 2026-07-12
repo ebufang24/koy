@@ -24,7 +24,7 @@ jobs:
           # 在这里填写你的节点，一个一行
           ###################################################
           URLS=(
-            "https://cruel-elise-ajgboqr-1fc1a11a.koyeb.app"
+            "https://koy.621011.xyz"
             #"https://node2.example.com"
             #"https://node3.example.com"
           )
